@@ -43,26 +43,42 @@ def process_twine_passage(passage_name, twine_passage):
 
     # First pass to collect dialogues and forks in order
     temp_text = text_content
-    dialogue_matches = []
 
-    for match in re.finditer(r"<div class=\"chat-container.*?>(.*?)<div class=\"text-box.*?\">(.*?)</div>.*?</div>", temp_text, re.DOTALL):
-        dialogue_text = re.search(r"<b>.*?</b>:(.*)", match.group(2), re.DOTALL)
-        if dialogue_text:
-            dialogues.append(dialogue_text.group(1).strip())
+    # --- Debugging Dialogue Extraction - START ---
+    print("--- Debugging Dialogue Extraction ---")
+    print("\n--- Input text being processed for dialogues ---")
+    print(temp_text)
+    print("--- End of input text ---")
+
+    dialogue_matches_container = list(re.finditer(r"<div class=\"chat-container.*?>(.*?)<div class=\"text-box.*?\">(.*?)</div>.*?</div>", temp_text, re.DOTALL))
+    print(f"\nNumber of 'chat-container' matches found: {len(dialogue_matches_container)}")
+    for match in dialogue_matches_container:
+        print(f"Chat Container Match: {match.group(0)}")
+        dialogue_text_search = re.search(r"<b>.*?</b>:(.*)", match.group(2), re.DOTALL)
+        if dialogue_text_search:
+            dialogue_text = dialogue_text_search.group(1).strip()
+            dialogues.append(dialogue_text)
             dialogues_index.append(dialogue_counter)
             dialogue_counter += 1
 
-    for match in re.finditer(r"<div class=\"chat-container-j.*?>(.*?)<div class=\"text-box-j.*?>(.*?)</div>.*?</div>", temp_text, re.DOTALL):
-        dialogue_text = re.search(r"<b>.*?</b>:(.*)", match.group(2), re.DOTALL)
-        if dialogue_text:
-            dialogues.append(dialogue_text.group(1).strip())
+    dialogue_matches_container_j = list(re.finditer(r"<div class=\"chat-container-j.*?>(.*?)<div class=\"text-box-j.*?>(.*?)</div>.*?</div>", temp_text, re.DOTALL))
+    print(f"\nNumber of 'chat-container-j' matches found: {len(dialogue_matches_container_j)}")
+    for match in dialogue_matches_container_j:
+        print(f"Chat Container-j Match: {match.group(0)}")
+        dialogue_text_search = re.search(r"<b>.*?</b>:(.*)", match.group(2), re.DOTALL)
+        if dialogue_text_search:
+            dialogue_text = dialogue_text_search.group(1).strip()
+            dialogues.append(dialogue_text)
             dialogues_index.append(dialogue_counter)
             dialogue_counter += 1
 
-    # Replace dialogues with variables in Output 1
-    dialogues_index_copy = dialogues_index[:] # Create a copy to avoid modifying the original in place
+    print(f"\nDialogues list: {dialogues}")
+    print(f"Dialogues index list: {dialogues_index}")
+    print("--- End of Dialogue Extraction Debugging ---")
+    # --- Debugging Dialogue Extraction - END ---
+
+
     processed_text_output1 = replace_dialogue_vars(processed_text_output1)
-
 
     forks = []
     fork_counter = 1
@@ -70,7 +86,7 @@ def process_twine_passage(passage_name, twine_passage):
 
     def replace_forks_vars(text):
         def fork_replace(match):
-            nonlocal fork_counter # Declare nonlocal here, before using fork_counter
+            nonlocal fork_counter
             forks_index.append(fork_counter)
             fork_counter += 1
             fork_text_full = match.group(1)
