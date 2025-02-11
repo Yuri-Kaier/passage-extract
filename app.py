@@ -70,8 +70,8 @@ def process_twine_passage(passage_name, twine_passage):
 
     def replace_forks_vars(text):
         def fork_replace(match):
+            nonlocal fork_counter # Declare nonlocal here, before using fork_counter
             forks_index.append(fork_counter)
-            nonlocal fork_counter
             fork_counter += 1
             fork_text_full = match.group(1)
             if "->" in fork_text_full:
